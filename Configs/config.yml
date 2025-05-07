@@ -4,8 +4,8 @@ device: "cuda"
 epochs: 200
 batch_size: 64
 pretrained_model: ""
-train_data: "Data/train_list.txt"
-val_data: "Data/val_list.txt"
+train_data: "Data/train_list_cleartext.txt"
+val_data: "Data/val_list_cleartext.txt"
 
 preprocess_parasm:
   sr: 24000
