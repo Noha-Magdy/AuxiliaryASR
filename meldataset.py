@@ -14,7 +14,7 @@ import torch.nn.functional as F
 import torchaudio
 from torch.utils.data import DataLoader
 
-# from g2p_en import G2p
+from g2p_en import G2p
 from nltk.tokenize import word_tokenize
 import phonemizer
 
@@ -56,7 +56,7 @@ class MelDataset(torch.utils.data.Dataset):
         self.to_melspec = torchaudio.transforms.MelSpectrogram(**MEL_PARAMS)
         self.mean, self.std = -4, 4
         
-        # self.g2p = G2p()
+        self.g2p = G2p()
 
     def __len__(self):
         return len(self.data_list)
@@ -91,13 +91,14 @@ class MelDataset(torch.utils.data.Dataset):
         # if "'" in ps:
         #     ps.remove("'")
 
-        if wave.shape[-1] == 2:
-            wave = wave[:, 0].squeeze()
-        if sr != 24000:
-            wave = librosa.resample(wave, orig_sr=sr, target_sr=24000)
-            print(wave_path, sr)
+        # if wave.shape[-1] == 2:
+        #     wave = wave[:, 0].squeeze()
+        # if sr != 24000:
+        #     wave = librosa.resample(wave, orig_sr=sr, target_sr=24000)
+        #     print(wave_path, sr)
 
         ps = global_phonemizer.phonemize([text])
+        # print("-----------phonemized------------")
         ps = word_tokenize(ps[0])
         ps = ' '.join(ps)
           # phonemize the text
@@ -106,6 +107,7 @@ class MelDataset(torch.utils.data.Dataset):
         
 
         text = self.text_cleaner(ps)
+        # print("-----------cleaned----------------")
         blank_index = self.text_cleaner.word_index_dictionary[" "]
         text.insert(0, blank_index) # add a blank at the beginning (silence)
         text.append(blank_index) # add a blank at the end (silence)

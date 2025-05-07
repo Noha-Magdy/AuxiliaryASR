@@ -54,14 +54,12 @@ def main(config_path):
                                         num_workers=8,
                                         dataset_config=config.get('dataset_params', {}),
                                         device=device)
-
     val_dataloader = build_dataloader(val_list,
                                       batch_size=batch_size,
                                       validation=True,
                                       num_workers=2,
                                       device=device,
                                       dataset_config=config.get('dataset_params', {}))
-
     model = build_model(model_params=config['model_params'] or {})
 
     scheduler_params = {
@@ -76,7 +74,6 @@ def main(config_path):
         {"params": model.parameters(), "optimizer_params":{}, "scheduler_params": scheduler_params})
 
     blank_index = train_dataloader.dataset.text_cleaner.word_index_dictionary[" "] # get blank index
-
     criterion = build_criterion(critic_params={
                 'ctc': {'blank': blank_index},
         })
