@@ -14,7 +14,9 @@ import torch.nn.functional as F
 import torchaudio
 from torch.utils.data import DataLoader
 
-from g2p_en import G2p
+# from g2p_en import G2p
+from nltk.tokenize import word_tokenize
+import phonemizer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,6 +37,7 @@ MEL_PARAMS = {
     "hop_length": 300
 }
 
+global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_punctuation=True,  with_stress=True)
 class MelDataset(torch.utils.data.Dataset):
     def __init__(self,
                  data_list,
@@ -47,13 +50,13 @@ class MelDataset(torch.utils.data.Dataset):
 
         _data_list = [l[:-1].split('|') for l in data_list]
         self.data_list = [data if len(data) == 3 else (*data, 0) for data in _data_list]
-        self.text_cleaner = TextCleaner(dict_path)
+        self.text_cleaner = TextCleaner()#dict_path)
         self.sr = sr
 
         self.to_melspec = torchaudio.transforms.MelSpectrogram(**MEL_PARAMS)
         self.mean, self.std = -4, 4
         
-        self.g2p = G2p()
+        # self.g2p = G2p()
 
     def __len__(self):
         return len(self.data_list)
@@ -78,13 +81,30 @@ class MelDataset(torch.utils.data.Dataset):
 
     def _load_tensor(self, data):
         wave_path, text, speaker_id = data
-        speaker_id = int(speaker_id)
+        # speaker_id = int(speaker_id)
+        speaker_id = 0
+
         wave, sr = sf.read(wave_path)
 
-        # phonemize the text
-        ps = self.g2p(text.replace('-', ' '))
-        if "'" in ps:
-            ps.remove("'")
+        # # phonemize the text
+        # ps = self.g2p(text.replace('-', ' '))
+        # if "'" in ps:
+        #     ps.remove("'")
+
+        if wave.shape[-1] == 2:
+            wave = wave[:, 0].squeeze()
+        if sr != 24000:
+            wave = librosa.resample(wave, orig_sr=sr, target_sr=24000)
+            print(wave_path, sr)
+
+        ps = global_phonemizer.phonemize([text])
+        ps = word_tokenize(ps[0])
+        ps = ' '.join(ps)
+          # phonemize the text
+        ps = ps.replace("(", "“")
+        ps = ps.replace(")", "”")
+        
+
         text = self.text_cleaner(ps)
         blank_index = self.text_cleaner.word_index_dictionary[" "]
         text.insert(0, blank_index) # add a blank at the beginning (silence)
