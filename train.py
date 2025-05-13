@@ -33,10 +33,10 @@ def main(config_path):
     if not osp.exists(log_dir): os.mkdir(log_dir)
     shutil.copy(config_path, osp.join(log_dir, osp.basename(config_path)))
 
-    writer = SummaryWriter(log_dir + "/tensorboard")
+    writer = SummaryWriter(log_dir + "/tensorboard_ar")
 
     # write logs
-    file_handler = logging.FileHandler(osp.join(log_dir, 'train.log'))
+    file_handler = logging.FileHandler(osp.join(log_dir, 'train_ar.log'))
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s: %(message)s'))
     logger.addHandler(file_handler)
@@ -105,7 +105,7 @@ def main(config_path):
                 for v in value:
                     writer.add_figure('eval_attn', plot_image(v), epoch)
         if (epoch % save_freq) == 0:
-            trainer.save_checkpoint(osp.join(log_dir, 'epoch_%05d.pth' % epoch))
+            trainer.save_checkpoint(osp.join(log_dir, 'ar_epoch_%05d.pth' % epoch))
             
     return 0
 
