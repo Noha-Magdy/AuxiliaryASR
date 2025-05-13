@@ -37,7 +37,7 @@ MEL_PARAMS = {
     "hop_length": 300
 }
 
-global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_punctuation=True,  with_stress=True)
+global_phonemizer = phonemizer.backend.EspeakBackend(language='ar', preserve_punctuation=True,  with_stress=True)
 class MelDataset(torch.utils.data.Dataset):
     def __init__(self,
                  data_list,
@@ -85,6 +85,8 @@ class MelDataset(torch.utils.data.Dataset):
         speaker_id = 0
 
         wave, sr = sf.read(wave_path)
+        wave = np.mean(wave, axis=1)
+
 
         # # phonemize the text
         # ps = self.g2p(text.replace('-', ' '))
