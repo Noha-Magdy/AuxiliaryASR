@@ -32,3 +32,4 @@ venv/
 #Ignore follwing folders
 
 Checkpoint/
+Data/
